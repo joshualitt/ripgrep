@@ -7,9 +7,9 @@ import * as os from 'node:os'
 import { dirname, join } from 'node:path'
 import { pathExists } from 'path-exists'
 import { pipeline } from 'node:stream/promises'
-import { temporaryFile } from 'tempy'
 import { fileURLToPath } from 'node:url'
 import { xdgCache } from 'xdg-basedir'
+import path from 'path';
 
 const { mkdir, createWriteStream, move } = fsExtra
 
@@ -17,7 +17,6 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 
 const REPOSITORY = `microsoft/ripgrep-prebuilt`
 const VERSION = process.env.RIPGREP_VERSION || 'v13.0.0-10'
-console.log({ VERSION })
 const BIN_PATH = join(__dirname, '../bin')
 
 const getTarget = () => {
@@ -62,13 +61,19 @@ const getTarget = () => {
 }
 
 export const downloadFile = async (url, outFile) => {
+  let tmpDir = undefined;
   try {
-    const tmpFile = temporaryFile()
+    tmpDir = await fsExtra.mkdtemp('download-ripgrep');
+    const tmpFile = path.join(tmpDir, 'tmp-file');
     await pipeline(got.stream(url), createWriteStream(tmpFile))
     await mkdir(dirname(outFile), { recursive: true })
     await move(tmpFile, outFile)
   } catch (error) {
     throw new VError(error, `Failed to download "${url}"`)
+  } finally {
+    if (tmpDir) {
+      await fsExtra.rm(tmpDir, {recursive: true, force: true})
+    }
   }
 }
 
@@ -98,19 +103,20 @@ const untarGz = async (inFile, outDir) => {
   }
 }
 
-export const downloadRipGrep = async () => {
+export const downloadRipGrep = async (overrideBinPath) => {
   const target = getTarget()
   const url = `https://github.com/${REPOSITORY}/releases/download/${VERSION}/ripgrep-${VERSION}-${target}`
   const downloadPath = `${xdgCache}/vscode-ripgrep/ripgrep-${VERSION}-${target}`
+  const binPath = overrideBinPath ?? BIN_PATH
   if (!(await pathExists(downloadPath))) {
     await downloadFile(url, downloadPath)
   } else {
     console.info(`File ${downloadPath} has been cached`)
   }
   if (downloadPath.endsWith('.tar.gz')) {
-    await untarGz(downloadPath, BIN_PATH)
+    await untarGz(downloadPath, binPath)
   } else if (downloadPath.endsWith('.zip')) {
-    await unzip(downloadPath, BIN_PATH)
+    await unzip(downloadPath, binPath)
   } else {
     throw new VError(`Invalid downloadPath ${downloadPath}`)
   }

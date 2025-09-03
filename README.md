@@ -1,3 +1,5 @@
+**This package is a temporary fork of `@lvce-editor/ripgrep`**
+
 # ripgrep
 
 A module for using [ripgrep](https://github.com/BurntSushi/ripgrep/) in a Node project.
