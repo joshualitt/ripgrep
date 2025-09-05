@@ -1,5 +1,5 @@
 {
-  "name": "@joshua.litt/download-ripgrep",
+  "name": "@joshua.litt/get-ripgrep",
   "version": "0.0.1",
   "description": "A module for downloading ripgrep at runtime a Node project",
   "main": "src/index.js",
