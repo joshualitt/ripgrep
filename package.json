@@ -1,9 +1,12 @@
 {
   "name": "@joshua.litt/get-ripgrep",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A module for downloading ripgrep at runtime a Node project",
-  "main": "src/index.js",
-  "typings": "src/index.d.ts",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "repository": {
     "type": "git",
@@ -11,6 +14,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "prepublishOnly": "npm run build",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
     "format": "prettier --write ."
