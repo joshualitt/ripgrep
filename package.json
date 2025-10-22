@@ -1,6 +1,6 @@
 {
   "name": "@joshua.litt/get-ripgrep",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A module for downloading ripgrep at runtime a Node project",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
