@@ -63,7 +63,7 @@ const getTarget = () => {
 export const downloadFile = async (url, outFile) => {
   let tmpDir = undefined;
   try {
-    tmpDir = await fsExtra.mkdtemp('download-ripgrep');
+    tmpDir = await fsExtra.mkdtemp(path.join(os.tmpdir(), 'download-ripgrep'));
     const tmpFile = path.join(tmpDir, 'tmp-file');
     await pipeline(got.stream(url), createWriteStream(tmpFile))
     await mkdir(dirname(outFile), { recursive: true })
