@@ -9,7 +9,8 @@ import { pathExists } from 'path-exists'
 import { pipeline } from 'node:stream/promises'
 import { fileURLToPath } from 'node:url'
 import { xdgCache } from 'xdg-basedir'
-import path from 'path';
+import path from 'path'
+import { getGotAgentOptions } from './proxy.js'
 
 const { mkdir, createWriteStream, move } = fsExtra
 
@@ -61,18 +62,21 @@ const getTarget = () => {
 }
 
 export const downloadFile = async (url, outFile) => {
-  let tmpDir = undefined;
+  let tmpDir = undefined
   try {
-    tmpDir = await fsExtra.mkdtemp(path.join(os.tmpdir(), 'download-ripgrep'));
-    const tmpFile = path.join(tmpDir, 'tmp-file');
-    await pipeline(got.stream(url), createWriteStream(tmpFile))
+    tmpDir = await fsExtra.mkdtemp(path.join(os.tmpdir(), 'download-ripgrep'))
+    const tmpFile = path.join(tmpDir, 'tmp-file')
+    await pipeline(
+      got.stream(url, getGotAgentOptions(url)),
+      createWriteStream(tmpFile),
+    )
     await mkdir(dirname(outFile), { recursive: true })
     await move(tmpFile, outFile)
   } catch (error) {
     throw new VError(error, `Failed to download "${url}"`)
   } finally {
     if (tmpDir) {
-      await fsExtra.rm(tmpDir, {recursive: true, force: true})
+      await fsExtra.rm(tmpDir, { recursive: true, force: true })
     }
   }
 }
