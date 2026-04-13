@@ -65,7 +65,7 @@ export const downloadFile = async (url, outFile) => {
   try {
     tmpDir = await fsExtra.mkdtemp(path.join(os.tmpdir(), 'download-ripgrep'));
     const tmpFile = path.join(tmpDir, 'tmp-file');
-    await pipeline(got.stream(url), createWriteStream(tmpFile))
+    await pipeline(got.stream(url, { timeout: { connect: 10000 } }), createWriteStream(tmpFile))
     await mkdir(dirname(outFile), { recursive: true })
     await move(tmpFile, outFile)
   } catch (error) {
